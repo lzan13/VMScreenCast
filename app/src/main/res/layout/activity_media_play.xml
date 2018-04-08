@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layout_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:animateLayoutChanges="true"
+    android:background="@color/vm_theme_background"
+    android:clipToPadding="true"
+    android:fitsSystemWindows="true"
+    tools:context=".ui.MediaPlayActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/widget_appbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/vm_dimen_56"
+        android:theme="@style/AppTheme.AppbarOverlay"
+        app:elevation="@dimen/vm_dimen_0">
+        <!--主界面 Toolbar-->
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/widget_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="@style/AppTheme.ToolbarOverlay"
+            app:popupTheme="@style/AppTheme.PopupOverlay" />
+    </android.support.design.widget.AppBarLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!--播放部分-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="@dimen/vm_dimen_128">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/vm_dimen_24">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/current_cast_content"
+                    android:textColor="@color/vm_white_54"
+                    android:textSize="@dimen/vm_size_subhead" />
+
+                <TextView
+                    android:id="@+id/text_content_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textColor="@color/vm_white_87"
+                    android:textSize="@dimen/vm_size_headline" />
+
+                <TextView
+                    android:id="@+id/text_content_url"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/app_name"
+                    android:textColor="@color/vm_white_87"
+                    android:textSize="@dimen/vm_size_subhead" />
+            </LinearLayout>
+        </RelativeLayout>
+
+        <!--控制部分-->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <!--音量-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="@dimen/vm_dimen_24">
+
+                <ImageView
+                    android:id="@+id/img_volume"
+                    android:layout_width="@dimen/vm_dimen_24"
+                    android:layout_height="@dimen/vm_dimen_24"
+                    android:background="@drawable/vm_click_circle_white"
+                    android:src="@drawable/ic_volume_up_24dp" />
+
+                <SeekBar
+                    android:id="@+id/seek_bar_volume"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:progress="50"
+                    android:progressBackgroundTint="@color/vm_green_54" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:orientation="vertical">
+
+                <!--进度-->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/vm_dimen_8">
+
+                    <TextView
+                        android:id="@+id/text_play_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="@dimen/vm_dimen_4"
+                        android:text="00:00:00"
+                        android:textColor="@color/vm_white_87"
+                        android:textSize="@dimen/vm_size_10" />
+
+                    <TextView
+                        android:id="@+id/text_play_max_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_margin="@dimen/vm_dimen_4"
+                        android:text="00:00:00"
+                        android:textColor="@color/vm_white_87"
+                        android:textSize="@dimen/vm_size_10" />
+
+                    <android.support.v7.widget.AppCompatSeekBar
+                        android:id="@+id/seek_bar_progress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_toLeftOf="@id/text_play_max_time"
+                        android:layout_toRightOf="@id/text_play_time"
+                        android:progress="0"
+                        android:progressBackgroundTint="@color/vm_green_87" />
+                </RelativeLayout>
+
+                <!--播放控制-->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/vm_dimen_8"
+                    android:padding="@dimen/vm_dimen_8">
+
+                    <ImageView
+                        android:id="@+id/img_stop"
+                        android:layout_width="@dimen/vm_dimen_48"
+                        android:layout_height="@dimen/vm_dimen_48"
+                        android:background="@drawable/vm_click_circle_white"
+                        android:src="@drawable/ic_stop_24dp" />
+
+                    <ImageView
+                        android:id="@+id/img_play"
+                        android:layout_width="@dimen/vm_dimen_48"
+                        android:layout_height="@dimen/vm_dimen_48"
+                        android:layout_centerInParent="true"
+                        android:background="@drawable/vm_click_circle_white"
+                        android:src="@drawable/ic_play_circle_outline_24dp" />
+
+                    <ImageView
+                        android:id="@+id/img_next"
+                        android:layout_width="@dimen/vm_dimen_36"
+                        android:layout_height="@dimen/vm_dimen_36"
+                        android:layout_centerVertical="true"
+                        android:layout_marginLeft="@dimen/vm_dimen_24"
+                        android:layout_toRightOf="@id/img_play"
+                        android:background="@drawable/vm_click_circle_white"
+                        android:src="@drawable/ic_skip_next_24dp" />
+
+                    <ImageView
+                        android:id="@+id/img_previous"
+                        android:layout_width="@dimen/vm_dimen_36"
+                        android:layout_height="@dimen/vm_dimen_36"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="@dimen/vm_dimen_24"
+                        android:layout_toLeftOf="@id/img_play"
+                        android:background="@drawable/vm_click_circle_white"
+                        android:src="@drawable/ic_skip_previous_24dp" />
+                </RelativeLayout>
+            </LinearLayout>
+        </RelativeLayout>
+    </RelativeLayout>
+</android.support.design.widget.CoordinatorLayout>

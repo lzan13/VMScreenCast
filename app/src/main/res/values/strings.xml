@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">VMScreenCast</string>
+
+    <string name="menu_screen_cast">投屏设备</string>
+    <string name="current_cast_content">当前投屏资源:</string>
+    <string name="title_cast_control">投屏播放控制</string>
+    <string name="select_cast_device">选择要投屏的设备:</string>
+    <string name="parent_directory">上级目录</string>
+
+</resources>

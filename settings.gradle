@@ -1,0 +1,4 @@
+include ':app'
+
+include ':vmtools'
+project(':vmtools').projectDir = new File('../VMLibraryManager/vmtools')

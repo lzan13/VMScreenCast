@@ -1,0 +1,19 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="VMTheme">
+        <!-- Customize your theme here. -->
+    </style>
+
+    <style name="AppTheme.AppbarOverlay" parent="VMTheme.AppBarOverlay">
+
+    </style>
+
+    <style name="AppTheme.ToolbarOverlay" parent="VMTheme.ToolbarOverlay">
+
+    </style>
+
+    <style name="AppTheme.PopupOverlay" parent="VMTheme.PopupOverlay">
+
+    </style>
+</resources>

@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+
+    useLibrary 'org.apache.http.legacy'
+
+    defaultConfig {
+        applicationId "com.vmloft.develop.app.screencast"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    packagingOptions {
+        exclude 'META-INF/beans.xml'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:design:27.1.0'
+    // ButterKnife 库
+    compile 'com.jakewharton:butterknife:8.8.1'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
+    compile 'org.greenrobot:eventbus:3.0.0'
+    // Cling library
+    implementation 'org.fourthline.cling:cling-core:2.1.1'
+    implementation 'org.fourthline.cling:cling-support:2.1.1'
+    // Jetty library
+    implementation 'org.eclipse.jetty:jetty-server:8.1.21.v20160908'
+    implementation 'org.eclipse.jetty:jetty-servlet:8.1.21.v20160908'
+    implementation 'org.eclipse.jetty:jetty-client:8.1.21.v20160908'
+    // 日志管理
+    implementation 'org.slf4j:slf4j-simple:1.7.21'
+    // https://mvnrepository.com/artifact/javax.enterprise/cdi-api
+    provided group: 'javax.enterprise', name: 'cdi-api', version: '2.0'
+
+    // 自己封装的工具库
+    implementation project(':vmtools')
+}
