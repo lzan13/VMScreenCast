@@ -96,7 +96,7 @@ public class ClingManager {
     public void setLocalItem(Item item) {
         localItem = item;
         remoteItem = null;
-        ControlManager.getInstance().setState(ControlManager.CastState.STOP);
+        ControlManager.getInstance().setState(ControlManager.CastState.STOPED);
     }
 
     public Item getLocalItem() {
@@ -110,7 +110,7 @@ public class ClingManager {
     public void setRemoteItem(RemoteItem remoteItem) {
         this.remoteItem = remoteItem;
         this.localItem = null;
-        ControlManager.getInstance().setState(ControlManager.CastState.STOP);
+        ControlManager.getInstance().setState(ControlManager.CastState.STOPED);
     }
 
     public void startClingService() {

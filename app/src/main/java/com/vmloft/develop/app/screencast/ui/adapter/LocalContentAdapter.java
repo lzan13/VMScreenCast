@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.vmloft.develop.app.screencast.R;
-import com.vmloft.develop.app.screencast.callback.ItemClickListener;
+import com.vmloft.develop.app.screencast.listener.ItemClickListener;
 
 import org.fourthline.cling.support.model.DIDLObject;
 import org.fourthline.cling.support.model.container.Container;

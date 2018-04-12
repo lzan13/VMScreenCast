@@ -14,14 +14,20 @@ import android.widget.Toast;
 
 import com.vmloft.develop.app.screencast.R;
 import com.vmloft.develop.app.screencast.callback.ControlCallback;
+import com.vmloft.develop.app.screencast.entity.AVTransportInfo;
 import com.vmloft.develop.app.screencast.entity.RemoteItem;
+import com.vmloft.develop.app.screencast.entity.RenderingControlInfo;
 import com.vmloft.develop.app.screencast.manager.ClingManager;
 import com.vmloft.develop.app.screencast.manager.ControlManager;
+import com.vmloft.develop.app.screencast.ui.event.ControlEvent;
 import com.vmloft.develop.library.tools.VMActivity;
 import com.vmloft.develop.library.tools.utils.VMDateUtil;
 import com.vmloft.develop.library.tools.utils.VMLog;
 
 import org.fourthline.cling.support.model.item.Item;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -50,7 +56,8 @@ public class MediaPlayActivity extends VMActivity {
     public Item localItem;
     public RemoteItem remoteItem;
 
-    private int currVolume = 10;
+    private int defaultVolume = 10;
+    private int currVolume = defaultVolume;
     private boolean isMute = false;
     private int currProgress = 0;
 
@@ -102,6 +109,8 @@ public class MediaPlayActivity extends VMActivity {
 
         setVolumeSeekListener();
         setProgressSeekListener();
+        ControlManager.getInstance().initAVTransportCallback();
+        ControlManager.getInstance().initRenderingControlCallback();
     }
 
     /**
@@ -179,14 +188,11 @@ public class MediaPlayActivity extends VMActivity {
             public void onSuccess() {
                 ControlManager.getInstance().setMute(!isMute);
                 if (isMute) {
+                    if (currVolume == 0) {
+                        currVolume = defaultVolume;
+                    }
                     setVolume(currVolume);
                 }
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        volumeView.setImageResource(R.drawable.ic_volume_up_24dp);
-                    }
-                });
             }
 
             @Override
@@ -200,6 +206,7 @@ public class MediaPlayActivity extends VMActivity {
      * 设置音量大小
      */
     private void setVolume(int volume) {
+        currVolume = volume;
         ControlManager.getInstance().setVolumeCast(volume, new ControlCallback() {
             @Override
             public void onSuccess() {
@@ -218,15 +225,15 @@ public class MediaPlayActivity extends VMActivity {
      * 播放开关
      */
     private void play() {
-        if (ControlManager.getInstance().getState() == ControlManager.CastState.STOP) {
+        if (ControlManager.getInstance().getState() == ControlManager.CastState.STOPED) {
             if (localItem != null) {
                 newPlayCastLocalContent();
             } else {
                 newPlayCastRemoteContent();
             }
-        } else if (ControlManager.getInstance().getState() == ControlManager.CastState.PAUSE) {
+        } else if (ControlManager.getInstance().getState() == ControlManager.CastState.PAUSED) {
             playCast();
-        } else if (ControlManager.getInstance().getState() == ControlManager.CastState.PLAY) {
+        } else if (ControlManager.getInstance().getState() == ControlManager.CastState.PLAYING) {
             pauseCast();
         } else {
             Toast.makeText(activity, "正在连接设备，稍后操作", Toast.LENGTH_SHORT).show();
@@ -238,11 +245,11 @@ public class MediaPlayActivity extends VMActivity {
     }
 
     private void newPlayCastLocalContent() {
-        ControlManager.getInstance().setState(ControlManager.CastState.REQUEST);
+        ControlManager.getInstance().setState(ControlManager.CastState.TRANSITIONING);
         ControlManager.getInstance().newPlayCast(localItem, new ControlCallback() {
             @Override
             public void onSuccess() {
-                ControlManager.getInstance().setState(ControlManager.CastState.PLAY);
+                ControlManager.getInstance().setState(ControlManager.CastState.PLAYING);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -253,18 +260,18 @@ public class MediaPlayActivity extends VMActivity {
 
             @Override
             public void onError(int code, String msg) {
-                ControlManager.getInstance().setState(ControlManager.CastState.STOP);
+                ControlManager.getInstance().setState(ControlManager.CastState.STOPED);
                 showToast(String.format("New play cast local content failed %s", msg));
             }
         });
     }
 
     private void newPlayCastRemoteContent() {
-        ControlManager.getInstance().setState(ControlManager.CastState.REQUEST);
+        ControlManager.getInstance().setState(ControlManager.CastState.TRANSITIONING);
         ControlManager.getInstance().newPlayCast(remoteItem, new ControlCallback() {
             @Override
             public void onSuccess() {
-                ControlManager.getInstance().setState(ControlManager.CastState.PLAY);
+                ControlManager.getInstance().setState(ControlManager.CastState.PLAYING);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -275,7 +282,7 @@ public class MediaPlayActivity extends VMActivity {
 
             @Override
             public void onError(int code, String msg) {
-                ControlManager.getInstance().setState(ControlManager.CastState.STOP);
+                ControlManager.getInstance().setState(ControlManager.CastState.STOPED);
                 showToast(String.format("New play cast remote content failed %s", msg));
             }
         });
@@ -285,7 +292,7 @@ public class MediaPlayActivity extends VMActivity {
         ControlManager.getInstance().playCast(new ControlCallback() {
             @Override
             public void onSuccess() {
-                ControlManager.getInstance().setState(ControlManager.CastState.PLAY);
+                ControlManager.getInstance().setState(ControlManager.CastState.PLAYING);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -305,7 +312,7 @@ public class MediaPlayActivity extends VMActivity {
         ControlManager.getInstance().pauseCast(new ControlCallback() {
             @Override
             public void onSuccess() {
-                ControlManager.getInstance().setState(ControlManager.CastState.PAUSE);
+                ControlManager.getInstance().setState(ControlManager.CastState.PAUSED);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -325,7 +332,7 @@ public class MediaPlayActivity extends VMActivity {
         ControlManager.getInstance().stopCast(new ControlCallback() {
             @Override
             public void onSuccess() {
-                ControlManager.getInstance().setState(ControlManager.CastState.STOP);
+                ControlManager.getInstance().setState(ControlManager.CastState.STOPED);
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -359,6 +366,48 @@ public class MediaPlayActivity extends VMActivity {
         });
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventBus(ControlEvent event) {
+        AVTransportInfo avtInfo = event.getAvtInfo();
+        if (avtInfo != null) {
+            if (!TextUtils.isEmpty(avtInfo.getState())) {
+                if (avtInfo.getState().equals("TRANSITIONING")) {
+                    ControlManager.getInstance().setState(ControlManager.CastState.TRANSITIONING);
+                } else if (avtInfo.getState().equals("PLAYING")) {
+                    ControlManager.getInstance().setState(ControlManager.CastState.PLAYING);
+                    playView.setImageResource(R.drawable.ic_pause_circle_outline_24dp);
+                } else if (avtInfo.getState().equals("PAUSED_PLAYBACK")) {
+                    ControlManager.getInstance().setState(ControlManager.CastState.PAUSED);
+                    playView.setImageResource(R.drawable.ic_play_circle_outline_24dp);
+                } else if (avtInfo.getState().equals("STOPPED")) {
+                    ControlManager.getInstance().setState(ControlManager.CastState.STOPED);
+                    playView.setImageResource(R.drawable.ic_play_circle_outline_24dp);
+                } else {
+                    ControlManager.getInstance().setState(ControlManager.CastState.STOPED);
+                    playView.setImageResource(R.drawable.ic_play_circle_outline_24dp);
+                }
+            } else if (!TextUtils.isEmpty(avtInfo.getMediaDuration())) {
+                playMaxTimeView.setText(avtInfo.getMediaDuration());
+            } else if (!TextUtils.isEmpty(avtInfo.getTimePosition())) {
+                long progress = VMDateUtil.fromTimeString(avtInfo.getTimePosition());
+                progressSeekbar.setProgress((int) progress);
+                playTimeView.setText(avtInfo.getTimePosition());
+            }
+        }
+
+        RenderingControlInfo rcInfo = event.getRcInfo();
+        if (rcInfo != null && ControlManager.getInstance().getState() != ControlManager.CastState.STOPED) {
+            if (rcInfo.isMute() || rcInfo.getVolume() == 0) {
+                volumeView.setImageResource(R.drawable.ic_volume_off_24dp);
+                ControlManager.getInstance().setMute(true);
+            } else {
+                volumeView.setImageResource(R.drawable.ic_volume_up_24dp);
+                ControlManager.getInstance().setMute(false);
+            }
+            volumeSeekbar.setProgress(rcInfo.getVolume());
+        }
+    }
+
     private void showToast(final String msg) {
         runOnUiThread(new Runnable() {
             @Override
@@ -384,5 +433,18 @@ public class MediaPlayActivity extends VMActivity {
             return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        EventBus.getDefault().unregister(this);
     }
 }

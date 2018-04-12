@@ -9,7 +9,7 @@ import android.support.v7.widget.RecyclerView.LayoutManager;
 import android.widget.LinearLayout;
 
 import com.vmloft.develop.app.screencast.R;
-import com.vmloft.develop.app.screencast.callback.ItemClickListener;
+import com.vmloft.develop.app.screencast.listener.ItemClickListener;
 import com.vmloft.develop.app.screencast.manager.ClingManager;
 import com.vmloft.develop.app.screencast.ui.adapter.LocalContentAdapter;
 import com.vmloft.develop.app.screencast.ui.event.DIDLEvent;

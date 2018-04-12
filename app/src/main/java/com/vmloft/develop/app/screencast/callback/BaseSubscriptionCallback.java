@@ -7,6 +7,16 @@ import org.fourthline.cling.model.gena.CancelReason;
 import org.fourthline.cling.model.gena.GENASubscription;
 import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Service;
+import org.fourthline.cling.model.state.StateVariableValue;
+import org.fourthline.cling.support.lastchange.Event;
+import org.fourthline.cling.support.lastchange.EventedValue;
+import org.fourthline.cling.support.lastchange.InstanceID;
+import org.fourthline.cling.support.lastchange.LastChange;
+import org.fourthline.cling.support.lastchange.LastChangeParser;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by lzan13 on 2018/3/9.
@@ -25,15 +35,12 @@ public abstract class BaseSubscriptionCallback extends SubscriptionCallback {
     }
 
     @Override
-    protected void failed(GENASubscription subscription, UpnpResponse responseStatus,
-            Exception exception, String defaultMsg) {
+    protected void failed(GENASubscription subscription, UpnpResponse responseStatus, Exception exception, String defaultMsg) {
         VMLog.d("SubscriptionCallback failed");
     }
 
-
     @Override
-    protected void ended(GENASubscription subscription, CancelReason reason,
-            UpnpResponse responseStatus) {
+    protected void ended(GENASubscription subscription, CancelReason reason, UpnpResponse responseStatus) {
         VMLog.d("SubscriptionCallback ended");
     }
 
@@ -41,8 +48,32 @@ public abstract class BaseSubscriptionCallback extends SubscriptionCallback {
     protected void established(GENASubscription subscription) {}
 
     @Override
-    protected void eventReceived(GENASubscription subscription) {}
+    protected void eventsMissed(GENASubscription subscription, int numberOfMissedEvents) {}
 
     @Override
-    protected void eventsMissed(GENASubscription subscription, int numberOfMissedEvents) {}
+    protected void eventReceived(GENASubscription subscription) {
+        Map<String, StateVariableValue> values = subscription.getCurrentValues();
+        if (values != null && values.containsKey("LastChange")) {
+            LastChangeParser parser = getLastChangeParser();
+            String lastChangeValue = values.get("LastChange").toString();
+            VMLog.d("Last change value: %s", lastChangeValue);
+            try {
+                Event event = parser.parse(lastChangeValue);
+                List<InstanceID> ids = event.getInstanceIDs();
+                List<EventedValue> eventValues = new ArrayList<>();
+                for (InstanceID id : ids) {
+                    eventValues.addAll(id.getValues());
+                }
+                onReceived(eventValues);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+    }
+
+    protected abstract LastChangeParser getLastChangeParser();
+
+    protected abstract void onReceived(List<EventedValue> values);
+
 }

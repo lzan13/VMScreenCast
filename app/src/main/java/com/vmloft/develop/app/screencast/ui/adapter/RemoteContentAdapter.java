@@ -10,7 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.vmloft.develop.app.screencast.R;
-import com.vmloft.develop.app.screencast.callback.ItemClickListener;
+import com.vmloft.develop.app.screencast.listener.ItemClickListener;
 import com.vmloft.develop.app.screencast.entity.RemoteItem;
 
 import java.util.List;

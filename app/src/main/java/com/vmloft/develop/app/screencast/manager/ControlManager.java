@@ -1,10 +1,14 @@
 package com.vmloft.develop.app.screencast.manager;
 
-import com.vmloft.develop.app.screencast.VConstants;
 import com.vmloft.develop.app.screencast.VError;
+import com.vmloft.develop.app.screencast.callback.AVTransportCallback;
 import com.vmloft.develop.app.screencast.callback.ControlCallback;
+import com.vmloft.develop.app.screencast.callback.RenderingControlCallback;
+import com.vmloft.develop.app.screencast.entity.AVTransportInfo;
 import com.vmloft.develop.app.screencast.entity.ClingDevice;
 import com.vmloft.develop.app.screencast.entity.RemoteItem;
+import com.vmloft.develop.app.screencast.entity.RenderingControlInfo;
+import com.vmloft.develop.app.screencast.ui.event.ControlEvent;
 import com.vmloft.develop.app.screencast.utils.ClingUtil;
 import com.vmloft.develop.library.tools.utils.VMLog;
 
@@ -21,18 +25,11 @@ import org.fourthline.cling.support.avtransport.callback.SetAVTransportURI;
 import org.fourthline.cling.support.avtransport.callback.Stop;
 import org.fourthline.cling.support.contentdirectory.DIDLParser;
 import org.fourthline.cling.support.model.DIDLContent;
-import org.fourthline.cling.support.model.DIDLObject;
-import org.fourthline.cling.support.model.ProtocolInfo;
-import org.fourthline.cling.support.model.Res;
 import org.fourthline.cling.support.model.item.Item;
-import org.fourthline.cling.support.model.item.VideoItem;
 import org.fourthline.cling.support.renderingcontrol.callback.GetVolume;
 import org.fourthline.cling.support.renderingcontrol.callback.SetMute;
 import org.fourthline.cling.support.renderingcontrol.callback.SetVolume;
-import org.seamless.util.MimeType;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * Created by lzan13 on 2018/3/10.
@@ -50,7 +47,7 @@ public class ControlManager {
     private Service avtService;
     private Service rcService;
 
-    private CastState state = CastState.STOP;
+    private CastState state = CastState.STOPED;
     private boolean isMute = false;
 
     private ControlManager() {
@@ -357,6 +354,32 @@ public class ControlManager {
         });
     }
 
+    public void initAVTransportCallback() {
+        AVTransportCallback callback = new AVTransportCallback(avtService) {
+            @Override
+            protected void received(AVTransportInfo info) {
+                ControlEvent event = new ControlEvent();
+                event.setAvtInfo(info);
+                EventBus.getDefault().post(event);
+            }
+        };
+        ClingManager.getInstance().getControlPoint().execute(callback);
+    }
+
+    public void initRenderingControlCallback() {
+        RenderingControlCallback callback = new RenderingControlCallback(rcService) {
+            @Override
+            protected void received(RenderingControlInfo info) {
+                VMLog.d("RenderingControlCallback received: mute:%b, volume:%d", info.isMute(), info
+                        .getVolume());
+                ControlEvent event = new ControlEvent();
+                event.setRcInfo(info);
+                EventBus.getDefault().post(event);
+            }
+        };
+        ClingManager.getInstance().getControlPoint().execute(callback);
+    }
+
     /**
      * 检查视频传输服务是否存在
      */
@@ -417,10 +440,10 @@ public class ControlManager {
     }
 
     public enum CastState {
-        PLAY,
-        PAUSE,
-        STOP,
-        REQUEST
+        TRANSITIONING,
+        PLAYING,
+        PAUSED,
+        STOPED
     }
 
 }
