@@ -2,7 +2,6 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="VMTheme">
-        <!-- Customize your theme here. -->
     </style>
 
     <style name="AppTheme.AppbarOverlay" parent="VMTheme.AppBarOverlay">

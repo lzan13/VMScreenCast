@@ -109,8 +109,6 @@ public class MediaPlayActivity extends VMActivity {
 
         setVolumeSeekListener();
         setProgressSeekListener();
-        ControlManager.getInstance().initAVTransportCallback();
-        ControlManager.getInstance().initRenderingControlCallback();
     }
 
     /**
@@ -182,6 +180,7 @@ public class MediaPlayActivity extends VMActivity {
      * 静音开关
      */
     private void mute() {
+        // 先获取当前是否静音
         isMute = ControlManager.getInstance().isMute();
         ControlManager.getInstance().muteCast(!isMute, new ControlCallback() {
             @Override
@@ -192,6 +191,12 @@ public class MediaPlayActivity extends VMActivity {
                         currVolume = defaultVolume;
                     }
                     setVolume(currVolume);
+                }
+                // 这里是根据之前的状态判断的
+                if (isMute) {
+                    volumeView.setImageResource(R.drawable.ic_volume_up_24dp);
+                } else {
+                    volumeView.setImageResource(R.drawable.ic_volume_off_24dp);
                 }
             }
 
@@ -241,6 +246,7 @@ public class MediaPlayActivity extends VMActivity {
     }
 
     private void stop() {
+        ControlManager.getInstance().unInitScreenCastCallback();
         stopCast();
     }
 
@@ -250,6 +256,7 @@ public class MediaPlayActivity extends VMActivity {
             @Override
             public void onSuccess() {
                 ControlManager.getInstance().setState(ControlManager.CastState.PLAYING);
+                ControlManager.getInstance().initScreenCastCallback();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -272,6 +279,7 @@ public class MediaPlayActivity extends VMActivity {
             @Override
             public void onSuccess() {
                 ControlManager.getInstance().setState(ControlManager.CastState.PLAYING);
+                ControlManager.getInstance().initScreenCastCallback();
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -337,6 +345,7 @@ public class MediaPlayActivity extends VMActivity {
                     @Override
                     public void run() {
                         playView.setImageResource(R.drawable.ic_play_circle_outline_24dp);
+                        onFinish();
                     }
                 });
             }
@@ -382,13 +391,17 @@ public class MediaPlayActivity extends VMActivity {
                 } else if (avtInfo.getState().equals("STOPPED")) {
                     ControlManager.getInstance().setState(ControlManager.CastState.STOPED);
                     playView.setImageResource(R.drawable.ic_play_circle_outline_24dp);
+                    onFinish();
                 } else {
                     ControlManager.getInstance().setState(ControlManager.CastState.STOPED);
                     playView.setImageResource(R.drawable.ic_play_circle_outline_24dp);
+                    onFinish();
                 }
-            } else if (!TextUtils.isEmpty(avtInfo.getMediaDuration())) {
+            }
+            if (!TextUtils.isEmpty(avtInfo.getMediaDuration())) {
                 playMaxTimeView.setText(avtInfo.getMediaDuration());
-            } else if (!TextUtils.isEmpty(avtInfo.getTimePosition())) {
+            }
+            if (!TextUtils.isEmpty(avtInfo.getTimePosition())) {
                 long progress = VMDateUtil.fromTimeString(avtInfo.getTimePosition());
                 progressSeekbar.setProgress((int) progress);
                 playTimeView.setText(avtInfo.getTimePosition());
@@ -396,7 +409,8 @@ public class MediaPlayActivity extends VMActivity {
         }
 
         RenderingControlInfo rcInfo = event.getRcInfo();
-        if (rcInfo != null && ControlManager.getInstance().getState() != ControlManager.CastState.STOPED) {
+        if (rcInfo != null && ControlManager.getInstance()
+                .getState() != ControlManager.CastState.STOPED) {
             if (rcInfo.isMute() || rcInfo.getVolume() == 0) {
                 volumeView.setImageResource(R.drawable.ic_volume_off_24dp);
                 ControlManager.getInstance().setMute(true);

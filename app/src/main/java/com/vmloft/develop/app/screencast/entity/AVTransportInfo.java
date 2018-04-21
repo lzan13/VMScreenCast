@@ -4,6 +4,12 @@ package com.vmloft.develop.app.screencast.entity;
  * Created by lzan13 on 2018/4/11.
  */
 public class AVTransportInfo {
+
+    public static String TRANSITIONING = "TRANSITIONING";
+    public static String PLAYING = "PLAYING";
+    public static String PAUSED_PLAYBACK = "PAUSED_PLAYBACK";
+    public static String STOPPED = "STOPPED";
+
     private String state;
     private String mediaDuration;
     private String timePosition;

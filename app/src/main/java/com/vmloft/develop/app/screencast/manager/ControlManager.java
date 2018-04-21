@@ -10,6 +10,7 @@ import com.vmloft.develop.app.screencast.entity.RemoteItem;
 import com.vmloft.develop.app.screencast.entity.RenderingControlInfo;
 import com.vmloft.develop.app.screencast.ui.event.ControlEvent;
 import com.vmloft.develop.app.screencast.utils.ClingUtil;
+import com.vmloft.develop.library.tools.utils.VMDateUtil;
 import com.vmloft.develop.library.tools.utils.VMLog;
 
 import org.fourthline.cling.controlpoint.ControlPoint;
@@ -18,6 +19,8 @@ import org.fourthline.cling.model.message.UpnpResponse;
 import org.fourthline.cling.model.meta.Service;
 import org.fourthline.cling.model.types.UDAServiceType;
 import org.fourthline.cling.model.types.UnsignedIntegerFourBytes;
+import org.fourthline.cling.support.avtransport.callback.GetPositionInfo;
+import org.fourthline.cling.support.avtransport.callback.GetTransportInfo;
 import org.fourthline.cling.support.avtransport.callback.Pause;
 import org.fourthline.cling.support.avtransport.callback.Play;
 import org.fourthline.cling.support.avtransport.callback.Seek;
@@ -25,6 +28,9 @@ import org.fourthline.cling.support.avtransport.callback.SetAVTransportURI;
 import org.fourthline.cling.support.avtransport.callback.Stop;
 import org.fourthline.cling.support.contentdirectory.DIDLParser;
 import org.fourthline.cling.support.model.DIDLContent;
+import org.fourthline.cling.support.model.PositionInfo;
+import org.fourthline.cling.support.model.TransportInfo;
+import org.fourthline.cling.support.model.TransportState;
 import org.fourthline.cling.support.model.item.Item;
 import org.fourthline.cling.support.renderingcontrol.callback.GetVolume;
 import org.fourthline.cling.support.renderingcontrol.callback.SetMute;
@@ -46,6 +52,15 @@ public class ControlManager {
     private static ControlManager instance;
     private Service avtService;
     private Service rcService;
+    private UnsignedIntegerFourBytes instanceId;
+
+    private AVTransportCallback avtCallback;
+    private RenderingControlCallback rcCallback;
+    private boolean isScreenCast = false;
+    private String absTimeStr;
+    private long absTime;
+    private String trackDurationStr;
+    private long trackDuration;
 
     private CastState state = CastState.STOPED;
     private boolean isMute = false;
@@ -53,6 +68,7 @@ public class ControlManager {
     private ControlManager() {
         avtService = findServiceFromDevice(AV_TRANSPORT);
         rcService = findServiceFromDevice(RENDERING_CONTROL);
+        instanceId = new UnsignedIntegerFourBytes("0");
     }
 
     public static ControlManager getInstance() {
@@ -129,7 +145,7 @@ public class ControlManager {
             return;
         }
         ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
-        controlPoint.execute(new Play(avtService) {
+        controlPoint.execute(new Play(instanceId, avtService) {
             @Override
             public void success(ActionInvocation invocation) {
                 VMLog.i("Play success");
@@ -153,7 +169,7 @@ public class ControlManager {
             return;
         }
         ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
-        controlPoint.execute(new Pause(avtService) {
+        controlPoint.execute(new Pause(instanceId, avtService) {
             @Override
             public void success(ActionInvocation invocation) {
                 VMLog.i("Pause success");
@@ -177,7 +193,7 @@ public class ControlManager {
             return;
         }
         ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
-        controlPoint.execute(new Stop(avtService) {
+        controlPoint.execute(new Stop(instanceId, avtService) {
             @Override
             public void success(ActionInvocation invocation) {
                 VMLog.i("Stop success");
@@ -203,7 +219,7 @@ public class ControlManager {
             return;
         }
         ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
-        controlPoint.execute(new Seek(avtService, target) {
+        controlPoint.execute(new Seek(instanceId, avtService, target) {
             @Override
             public void success(ActionInvocation invocation) {
                 VMLog.d("Seek success - %s", target);
@@ -219,6 +235,7 @@ public class ControlManager {
     }
 
     /**
+     * -------------- RCService 相关操作 --------------
      * 设置投屏音量
      */
     public void setVolumeCast(int volume, final ControlCallback callback) {
@@ -227,7 +244,7 @@ public class ControlManager {
             return;
         }
         ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
-        controlPoint.execute(new SetVolume(rcService, volume) {
+        controlPoint.execute(new SetVolume(instanceId, rcService, volume) {
             @Override
             public void success(ActionInvocation invocation) {
                 VMLog.d("setVolume success");
@@ -243,30 +260,6 @@ public class ControlManager {
     }
 
     /**
-     * 获取投屏音量
-     */
-    public void getVolumeCast(final ControlCallback callback) {
-        if (checkRCService()) {
-            callback.onError(VError.SERVICE_IS_NULL, "RCService is null");
-            return;
-        }
-        ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
-        controlPoint.execute(new GetVolume(rcService) {
-            @Override
-            public void received(ActionInvocation actionInvocation, int currentVolume) {
-                VMLog.d("getVolume success");
-                callback.onSuccess();
-            }
-
-            @Override
-            public void failure(ActionInvocation invocation, UpnpResponse operation, String msg) {
-                VMLog.e("getVolume error %s", msg);
-                callback.onError(VError.UNKNOWN, msg);
-            }
-        });
-    }
-
-    /**
      * 静音投屏
      */
     public void muteCast(boolean mute, final ControlCallback callback) {
@@ -275,7 +268,7 @@ public class ControlManager {
             return;
         }
         ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
-        controlPoint.execute(new SetMute(rcService, mute) {
+        controlPoint.execute(new SetMute(instanceId, rcService, mute) {
             @Override
             public void success(ActionInvocation invocation) {
                 VMLog.d("Mute success");
@@ -310,7 +303,6 @@ public class ControlManager {
             e.printStackTrace();
         }
         VMLog.d("metadata: %s", metadata);
-        UnsignedIntegerFourBytes instanceId = new UnsignedIntegerFourBytes(0);
         ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
         controlPoint.execute(new SetAVTransportURI(instanceId, avtService, uri, metadata) {
             @Override
@@ -339,7 +331,7 @@ public class ControlManager {
         VMLog.i("metadata: " + metadata);
         final String uri = item.getUrl();
         ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
-        controlPoint.execute(new SetAVTransportURI(avtService, item.getUrl(), metadata) {
+        controlPoint.execute(new SetAVTransportURI(instanceId, avtService, item.getUrl(), metadata) {
             @Override
             public void success(ActionInvocation invocation) {
                 VMLog.i("setAVTransportURI success url:%s", uri);
@@ -354,8 +346,35 @@ public class ControlManager {
         });
     }
 
-    public void initAVTransportCallback() {
-        AVTransportCallback callback = new AVTransportCallback(avtService) {
+    /**
+     * 初始化投屏相关回调
+     */
+    public void initScreenCastCallback() {
+        unInitScreenCastCallback();
+        isScreenCast = true;
+        VMLog.d("initScreenCastCallback");
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (isScreenCast) {
+                    try {
+                        getPositionInfo();
+                        getTransportInfo();
+                        getVolume();
+                        // 如果是暂停状态就睡眠5秒
+                        if (state == CastState.PAUSED) {
+                            Thread.sleep(2000);
+                        } else {
+                            Thread.sleep(1000);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+        // 设置投屏传输相关回调
+        avtCallback = new AVTransportCallback(avtService) {
             @Override
             protected void received(AVTransportInfo info) {
                 ControlEvent event = new ControlEvent();
@@ -363,11 +382,10 @@ public class ControlManager {
                 EventBus.getDefault().post(event);
             }
         };
-        ClingManager.getInstance().getControlPoint().execute(callback);
-    }
+        ClingManager.getInstance().getControlPoint().execute(avtCallback);
 
-    public void initRenderingControlCallback() {
-        RenderingControlCallback callback = new RenderingControlCallback(rcService) {
+        // 设置播放控制相关回调，这个其实在大部分设备上都无效
+        rcCallback = new RenderingControlCallback(rcService) {
             @Override
             protected void received(RenderingControlInfo info) {
                 VMLog.d("RenderingControlCallback received: mute:%b, volume:%d", info.isMute(), info
@@ -377,7 +395,130 @@ public class ControlManager {
                 EventBus.getDefault().post(event);
             }
         };
-        ClingManager.getInstance().getControlPoint().execute(callback);
+        ClingManager.getInstance().getControlPoint().execute(rcCallback);
+    }
+
+    /**
+     * 取消初始化投屏相关回调
+     */
+    public void unInitScreenCastCallback() {
+        VMLog.d("unInitScreenCastCallback");
+        absTimeStr = "00:00:00";
+        absTime = 0;
+        trackDurationStr = "00:00:00";
+        trackDuration = 0;
+
+        isScreenCast = false;
+        avtCallback = null;
+        rcCallback = null;
+    }
+
+    /**
+     * 获取投屏设备端播放进度信息
+     */
+    public void getPositionInfo() {
+        if (checkAVTService()) {
+            return;
+        }
+        ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
+        controlPoint.execute(new GetPositionInfo(instanceId, avtService) {
+            @Override
+            public void received(ActionInvocation invocation, PositionInfo positionInfo) {
+                if (positionInfo != null) {
+                    AVTransportInfo info = new AVTransportInfo();
+                    info.setTimePosition(positionInfo.getAbsTime());
+                    info.setMediaDuration(positionInfo.getTrackDuration());
+                    ControlEvent event = new ControlEvent();
+                    event.setAvtInfo(info);
+                    EventBus.getDefault().post(event);
+
+                    absTimeStr = positionInfo.getAbsTime();
+                    absTime = VMDateUtil.fromTimeString(absTimeStr);
+                    trackDurationStr = positionInfo.getTrackDuration();
+                    trackDuration = VMDateUtil.fromTimeString(trackDurationStr);
+                    if (absTimeStr.equals(trackDurationStr) && absTime != 0 && trackDuration != 0) {
+                        unInitScreenCastCallback();
+                    }
+                }
+                VMLog.d("getPositionInfo success positionInfo:" + positionInfo.toString());
+            }
+
+            @Override
+            public void failure(ActionInvocation invocation, UpnpResponse operation, String msg) {
+                VMLog.e("getPositionInfo failed");
+            }
+        });
+    }
+
+    /**
+     * 获取投屏设备播放端数据传输状态信息
+     */
+    public void getTransportInfo() {
+        if (checkAVTService()) {
+            return;
+        }
+        ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
+        controlPoint.execute(new GetTransportInfo(instanceId, avtService) {
+
+            @Override
+            public void received(ActionInvocation invocation, TransportInfo transportInfo) {
+                TransportState ts = transportInfo.getCurrentTransportState();
+                AVTransportInfo info = new AVTransportInfo();
+                if (TransportState.TRANSITIONING == ts) {
+                    info.setState(AVTransportInfo.TRANSITIONING);
+                } else if (TransportState.PLAYING == ts) {
+                    info.setState(AVTransportInfo.PLAYING);
+                } else if (TransportState.PAUSED_PLAYBACK == ts) {
+                    info.setState(AVTransportInfo.PAUSED_PLAYBACK);
+                } else if (TransportState.STOPPED == ts) {
+                    info.setState(AVTransportInfo.STOPPED);
+                    if (absTime != 0 && trackDuration != 0) {
+                        unInitScreenCastCallback();
+                    }
+                } else {
+                    info.setState(AVTransportInfo.STOPPED);
+                    if (absTime != 0 && trackDuration != 0) {
+                        unInitScreenCastCallback();
+                    }
+                }
+                ControlEvent event = new ControlEvent();
+                event.setAvtInfo(info);
+                EventBus.getDefault().post(event);
+                VMLog.d("getTransportInfo success transportInfo:" + ts.getValue());
+            }
+
+            @Override
+            public void failure(ActionInvocation invocation, UpnpResponse operation, String msg) {
+                VMLog.e("getTransportInfo failed");
+            }
+        });
+    }
+
+    /**
+     * 获取投屏音量
+     */
+    public void getVolume() {
+        if (checkRCService()) {
+            return;
+        }
+        ControlPoint controlPoint = ClingManager.getInstance().getControlPoint();
+        controlPoint.execute(new GetVolume(instanceId, rcService) {
+            @Override
+            public void received(ActionInvocation actionInvocation, int currentVolume) {
+                RenderingControlInfo info = new RenderingControlInfo();
+                info.setVolume(currentVolume);
+                info.setMute(false);
+                ControlEvent event = new ControlEvent();
+                event.setRcInfo(info);
+                EventBus.getDefault().post(event);
+                VMLog.d("getVolume success volume:" + currentVolume);
+            }
+
+            @Override
+            public void failure(ActionInvocation invocation, UpnpResponse operation, String msg) {
+                VMLog.e("getVolume error %s", msg);
+            }
+        });
     }
 
     /**

@@ -12,6 +12,8 @@ import java.util.List;
 
 /**
  * Created by lzan13 on 2018/3/5.
+ * 投屏传输状态相关回调，这里主要回调播放状态，以及播放进度，播放资源的整体时间，
+ * 但是经测试这个进度和整体时间只在 AirPin 上有效，小米盒子和天猫盒子无效
  */
 public abstract class AVTransportCallback extends BaseSubscriptionCallback {
     private final String TAG = this.getClass().getSimpleName();

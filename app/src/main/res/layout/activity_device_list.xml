@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@color/vm_theme_background_light"
+    android:background="@color/vm_theme_background"
     android:clipToPadding="true"
     android:fitsSystemWindows="true"
     tools:context=".ui.MainActivity">

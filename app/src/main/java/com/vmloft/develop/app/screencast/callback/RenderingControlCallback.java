@@ -20,6 +20,7 @@ import java.util.List;
 
 /**
  * Created by lzan13 on 2018/3/5.
+ * 投屏播放控制相关回调，这里主要会回调音量和是否静音
  */
 public abstract class RenderingControlCallback extends BaseSubscriptionCallback {
     private final String TAG = this.getClass().getSimpleName();

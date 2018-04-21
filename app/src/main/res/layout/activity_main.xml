@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@color/vm_theme_background_light"
+    android:background="@color/vm_theme_background"
     android:clipToPadding="true"
     android:fitsSystemWindows="true"
     tools:context=".ui.MainActivity">
@@ -43,18 +43,18 @@
                 android:id="@+id/widget_tab_layout"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/vm_dimen_36"
-                app:tabBackground="@color/vm_theme_primary_light"
+                app:tabBackground="@color/vm_theme_primary"
                 app:tabIndicatorColor="@color/vm_white_87"
                 app:tabIndicatorHeight="@dimen/vm_dimen_2"
                 app:tabMode="fixed"
-                app:tabSelectedTextColor="@color/vm_white_100"
+                app:tabSelectedTextColor="@color/vm_white"
                 app:tabTextColor="@color/vm_white_54" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:animateLayoutChanges="true"
-                android:background="@color/vm_theme_background_light"
+                android:background="@color/vm_theme_background"
                 android:orientation="vertical">
                 <!--盛放 Fragment 的容器-->
                 <android.support.v4.view.ViewPager
@@ -72,7 +72,6 @@
             android:layout_alignParentRight="true"
             android:layout_margin="@dimen/vm_dimen_16"
             android:src="@drawable/ic_cast_24dp"
-            app:backgroundTint="@color/vm_gray_100"
             app:fabSize="normal" />
     </RelativeLayout>
 </android.support.design.widget.CoordinatorLayout>

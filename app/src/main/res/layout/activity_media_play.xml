@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:animateLayoutChanges="true"
-    android:background="@color/vm_theme_background"
+    android:background="@color/vm_gray"
     android:clipToPadding="true"
     android:fitsSystemWindows="true"
     tools:context=".ui.MediaPlayActivity">
@@ -86,9 +86,9 @@
 
                 <ImageView
                     android:id="@+id/img_volume"
-                    android:layout_width="@dimen/vm_dimen_24"
-                    android:layout_height="@dimen/vm_dimen_24"
-                    android:background="@drawable/vm_click_circle_white"
+                    style="@style/VMBtn.Flat.Fillet"
+                    android:layout_width="@dimen/vm_dimen_36"
+                    android:layout_height="@dimen/vm_dimen_36"
                     android:src="@drawable/ic_volume_up_24dp" />
 
                 <SeekBar
@@ -150,37 +150,38 @@
 
                     <ImageView
                         android:id="@+id/img_stop"
-                        android:layout_width="@dimen/vm_dimen_48"
-                        android:layout_height="@dimen/vm_dimen_48"
-                        android:background="@drawable/vm_click_circle_white"
+                        style="@style/VMBtn.Flat.Fillet"
+                        android:layout_width="@dimen/vm_dimen_56"
+                        android:layout_height="@dimen/vm_dimen_56"
+                        android:layout_centerVertical="true"
                         android:src="@drawable/ic_stop_24dp" />
 
                     <ImageView
                         android:id="@+id/img_play"
-                        android:layout_width="@dimen/vm_dimen_48"
-                        android:layout_height="@dimen/vm_dimen_48"
+                        style="@style/VMBtn.Flat.Fillet"
+                        android:layout_width="@dimen/vm_dimen_64"
+                        android:layout_height="@dimen/vm_dimen_64"
                         android:layout_centerInParent="true"
-                        android:background="@drawable/vm_click_circle_white"
                         android:src="@drawable/ic_play_circle_outline_24dp" />
 
                     <ImageView
                         android:id="@+id/img_next"
-                        android:layout_width="@dimen/vm_dimen_36"
-                        android:layout_height="@dimen/vm_dimen_36"
+                        style="@style/VMBtn.Flat.Fillet"
+                        android:layout_width="@dimen/vm_dimen_48"
+                        android:layout_height="@dimen/vm_dimen_48"
                         android:layout_centerVertical="true"
                         android:layout_marginLeft="@dimen/vm_dimen_24"
                         android:layout_toRightOf="@id/img_play"
-                        android:background="@drawable/vm_click_circle_white"
                         android:src="@drawable/ic_skip_next_24dp" />
 
                     <ImageView
                         android:id="@+id/img_previous"
-                        android:layout_width="@dimen/vm_dimen_36"
-                        android:layout_height="@dimen/vm_dimen_36"
+                        style="@style/VMBtn.Flat.Fillet"
+                        android:layout_width="@dimen/vm_dimen_48"
+                        android:layout_height="@dimen/vm_dimen_48"
                         android:layout_centerVertical="true"
                         android:layout_marginRight="@dimen/vm_dimen_24"
                         android:layout_toLeftOf="@id/img_play"
-                        android:background="@drawable/vm_click_circle_white"
                         android:src="@drawable/ic_skip_previous_24dp" />
                 </RelativeLayout>
             </LinearLayout>
