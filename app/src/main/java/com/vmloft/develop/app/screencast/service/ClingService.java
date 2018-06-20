@@ -5,7 +5,7 @@ import android.os.IBinder;
 
 import com.vmloft.develop.app.screencast.service.upnp.AndroidJettyServletContainer;
 import com.vmloft.develop.app.screencast.service.upnp.ClingContentDirectoryService;
-import com.vmloft.develop.library.tools.utils.IPUtils;
+import com.vmloft.develop.library.tools.utils.VMNetwork;
 import com.vmloft.develop.library.tools.utils.VMLog;
 
 import org.fourthline.cling.UpnpServiceConfiguration;
@@ -64,7 +64,7 @@ public class ClingService extends AndroidUpnpServiceImpl {
         localService.setManager(
                 new DefaultServiceManager<>(localService, ClingContentDirectoryService.class));
 
-        String macAddress = IPUtils.getMacAddress();
+        String macAddress = VMNetwork.getMacAddress();
         //Generate UUID by MAC address
         UDN udn = UDN.valueOf(UUID.nameUUIDFromBytes(macAddress.getBytes()).toString());
 

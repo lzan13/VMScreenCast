@@ -21,7 +21,7 @@ import com.vmloft.develop.app.screencast.manager.ClingManager;
 import com.vmloft.develop.app.screencast.manager.ControlManager;
 import com.vmloft.develop.app.screencast.ui.event.ControlEvent;
 import com.vmloft.develop.library.tools.VMActivity;
-import com.vmloft.develop.library.tools.utils.VMDateUtil;
+import com.vmloft.develop.library.tools.utils.VMDate;
 import com.vmloft.develop.library.tools.utils.VMLog;
 
 import org.fourthline.cling.support.model.item.Item;
@@ -104,7 +104,7 @@ public class MediaPlayActivity extends VMActivity {
 
         if (!TextUtils.isEmpty(duration)) {
             playMaxTimeView.setText(duration);
-            progressSeekbar.setMax((int) VMDateUtil.fromTimeString(duration));
+            progressSeekbar.setMax((int) VMDate.fromTimeString(duration));
         }
 
         setVolumeSeekListener();
@@ -150,7 +150,7 @@ public class MediaPlayActivity extends VMActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 currProgress = seekBar.getProgress();
-                playTimeView.setText(VMDateUtil.toTimeString(currProgress));
+                playTimeView.setText(VMDate.toTimeString(currProgress));
                 seekCast(currProgress);
             }
         });
@@ -361,7 +361,7 @@ public class MediaPlayActivity extends VMActivity {
      * 改变投屏进度
      */
     private void seekCast(int progress) {
-        String target = VMDateUtil.toTimeString(progress);
+        String target = VMDate.toTimeString(progress);
         ControlManager.getInstance().seekCast(target, new ControlCallback() {
             @Override
             public void onSuccess() {
@@ -402,7 +402,7 @@ public class MediaPlayActivity extends VMActivity {
                 playMaxTimeView.setText(avtInfo.getMediaDuration());
             }
             if (!TextUtils.isEmpty(avtInfo.getTimePosition())) {
-                long progress = VMDateUtil.fromTimeString(avtInfo.getTimePosition());
+                long progress = VMDate.fromTimeString(avtInfo.getTimePosition());
                 progressSeekbar.setProgress((int) progress);
                 playTimeView.setText(avtInfo.getTimePosition());
             }

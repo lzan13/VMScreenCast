@@ -25,7 +25,7 @@ import android.provider.MediaStore.Images;
 
 import com.vmloft.develop.app.screencast.VConstants;
 import com.vmloft.develop.app.screencast.entity.VItem;
-import com.vmloft.develop.library.tools.utils.IPUtils;
+import com.vmloft.develop.library.tools.utils.VMNetwork;
 
 import org.fourthline.cling.model.ModelUtil;
 import org.fourthline.cling.support.model.PersonWithRole;
@@ -47,7 +47,7 @@ public class MediaContentDao {
 
     public MediaContentDao(Context context) {
         cr = context.getContentResolver();
-        serverURL = "http://" + IPUtils.getLocalIP() + ":" + VConstants.JETTY_SERVER_PORT + "/";
+        serverURL = "http://" + VMNetwork.getLocalIP() + ":" + VConstants.JETTY_SERVER_PORT + "/";
     }
 
     public ArrayList<Item> getAudioItems() {

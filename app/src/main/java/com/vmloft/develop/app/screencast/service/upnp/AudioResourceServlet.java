@@ -22,7 +22,7 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import com.vmloft.develop.app.screencast.VApplication;
-import com.vmloft.develop.library.tools.utils.VMFileUtil;
+import com.vmloft.develop.library.tools.utils.VMFile;
 
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.util.resource.FileResource;
@@ -38,7 +38,7 @@ public class AudioResourceServlet extends DefaultServlet {
 
         Log.i(AudioResourceServlet.class.getSimpleName(), "Path:" + pathInContext);
         try {
-            String id = VMFileUtil.parseResourceId(pathInContext);
+            String id = VMFile.parseResourceId(pathInContext);
             Log.i(AudioResourceServlet.class.getSimpleName(), "Id:" + id);
 
             Uri uri = ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, Long.parseLong(id));

@@ -10,7 +10,7 @@ import com.vmloft.develop.app.screencast.entity.RemoteItem;
 import com.vmloft.develop.app.screencast.entity.RenderingControlInfo;
 import com.vmloft.develop.app.screencast.ui.event.ControlEvent;
 import com.vmloft.develop.app.screencast.utils.ClingUtil;
-import com.vmloft.develop.library.tools.utils.VMDateUtil;
+import com.vmloft.develop.library.tools.utils.VMDate;
 import com.vmloft.develop.library.tools.utils.VMLog;
 
 import org.fourthline.cling.controlpoint.ControlPoint;
@@ -433,9 +433,9 @@ public class ControlManager {
                     EventBus.getDefault().post(event);
 
                     absTimeStr = positionInfo.getAbsTime();
-                    absTime = VMDateUtil.fromTimeString(absTimeStr);
+                    absTime = VMDate.fromTimeString(absTimeStr);
                     trackDurationStr = positionInfo.getTrackDuration();
-                    trackDuration = VMDateUtil.fromTimeString(trackDurationStr);
+                    trackDuration = VMDate.fromTimeString(trackDurationStr);
                     if (absTimeStr.equals(trackDurationStr) && absTime != 0 && trackDuration != 0) {
                         unInitScreenCastCallback();
                     }
